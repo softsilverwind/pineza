@@ -17,38 +17,55 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 		when '/'
 			response.status = 200
 			response.content_type = 'text/html'
-			response.body = ERB.new(File.read(File.join(Datadir, 'leaflet.erb')), 0, '<>').result
+			response.body = File.read(File.join(Datadir, 'index.html'))
 		when '/data'
 			response.status = 200
 			response.content_type = 'application/json'
-			response.body = JSON.generate(@worker.current_dataset)
+			response.body = @worker.dataset.to_json
 		else
-			response.status = 404
-			response.content_type = 'text/html'
-			response.body = 'method not found'
+			file = File.join(Datadir, request.path[1..-1])
+			ext = file.split('.')[-1]
+
+			if File.exists?(file)
+				response.status = 200
+				case ext
+				when 'html'
+					response.content_type = 'text/html'
+				when 'js'
+					response.content_type = 'application/javascript'
+				when 'ico'
+					response.content_type = 'image/x-icon'
+				end
+				response.body = File.read(file)
+			else
+				response.status = 404
+				response.content_type = 'text/html'
+				response.body = 'Page not found'
+			end
 		end
 	end
 
 	def do_POST (request, response)
 		case request.path
 		when '/keypress'
-			response.content_type = 'text/html'
 			response.status = 200
-			response.body = "OK"
+			response.content_type = 'text/html'
 
 			char = JSON.parse(request.body)['character']
 			callback = @worker.keypress_callback(char)
 			if callback
 				case callback.arity
 				when 0
-					callback.call()
+					statusmsg = callback.call()
 				when 1
-					callback.call(char)
+					statusmsg = callback.call(char)
 				else
 					response.status = 500
 					response.body = "Invalid callback"
 				end
 			end
+
+			response.body = if statusmsg.class == String then statusmsg else "Ok" end
 		when '/click'
 			response.content_type = 'text/html'
 			response.status = 200

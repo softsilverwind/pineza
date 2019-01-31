@@ -24,38 +24,46 @@ An example in the (hopefully) current iteration is shown here:
 ```ruby
 #!/usr/bin/env ruby
 
-require 'json'
-
 require 'pineza'
 
 Pineza::Worker.init do |worker|
-    points = []
+	datasets = []
+	points = []
 
-    STDIN.each_line do |line|
-        line.strip!
-        if line.empty?
-            lines = points.each_cons(2).map do |tup|
-                Pineza::Structs::Line.new *tup, 'green'
-            end
+	STDIN.each_line do |line|
+		line.strip!
+		if !line.empty?
+			point = line.split(',').map(&:to_f)
+			points << [*point, point.inspect]
+		else
+			lines = points.each_cons(2).map { |tup| [*tup, 'green'] }
+			datasets << [points, lines]
+			points = []
+		end
+	end
 
-            worker.datasets << {
-                points: points,
-                lines: lines
-            }
+	i = 0
+	worker.points = datasets[i][0]
+	worker.lines = datasets[i][1]
 
-            points = []
-        else
-            point = line.split(',').map(&:to_f)
-            points << Pineza::Structs::Point.new(*point, point.inspect)
-        end
-    end
+	worker.on_keypress('pn') do |c|
+		if c == 'n'
+			i += 1
+		elsif c == 'p'
+			i -= 1
+		end
 
-    worker.on_keypress('n') { worker.next_dataset }
-    worker.on_keypress('p') { worker.previous_dataset }
+		i %= datasets.length
 
-    worker.on_click { |lat, lon|
-        p [lat, lon]
-    }
+		p i
+
+		worker.points = datasets[i][0]
+		worker.lines = datasets[i][1]
+	end
+
+	worker.on_click do |lat, lon|
+		p [lat, lon]
+	end
 end
 ```
 
