@@ -22,6 +22,10 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 			response.status = 200
 			response.content_type = 'application/json'
 			response.body = @worker.dataset.to_json
+		when '/metadata'
+			response.status = 200
+			response.content_type = 'application/json'
+			response.body = @worker.metadata.to_json
 		else
 			file = File.join(Datadir, request.path[1..-1])
 			ext = file.split('.')[-1]
@@ -56,16 +60,21 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 			if callback
 				case callback.arity
 				when 0
-					statusmsg = callback.call()
+					ret = callback.call()
 				when 1
-					statusmsg = callback.call(char)
+					ret = callback.call(char)
 				else
 					response.status = 500
 					response.body = "Invalid callback"
 				end
 			end
 
-			response.body = if statusmsg.class == String then statusmsg else "Ok" end
+			response.body = if ret.class == Hash
+				puts ret[:msg]
+				ret.to_json
+			else
+				{ msg: '' }.to_json
+			end
 		when '/click'
 			response.content_type = 'text/html'
 			response.status = 200
@@ -76,13 +85,78 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 			if callback
 				case callback.arity
 				when 0
-					callback.call()
+					ret = callback.call()
 				when 2
-					callback.call(lat, lon)
+					ret = callback.call(lat, lon)
 				else
 					response.status = 500
 					response.body = "Invalid callback"
 				end
+			end
+
+			response.body = if ret.class == Hash then
+				puts ret[:msg]
+				ret.to_json
+			else
+				{ msg: '' }.to_json
+			end
+		when '/marker_click'
+			response.content_type = 'text/html'
+			response.status = 200
+			response.body = "OK"
+
+			id = JSON.parse(request.body)['id']
+			callback = @worker.marker_click_callback()
+			if callback
+				case callback.arity
+				when 0
+					ret = callback.call()
+				when 1
+					ret = callback.call(id)
+				else
+					response.status = 500
+					response.body = "Invalid callback"
+				end
+			end
+
+			response.body = if ret.class == Hash then
+				puts ret[:msg]
+				ret.to_json
+			else
+				{ msg: '' }.to_json
+			end
+		else
+			response.status = 404
+			response.content_type = 'text/html'
+			response.body = 'method not found'
+		end
+	end
+
+	def do_PUT (request, response)
+		case request.path
+		when '/data'
+			response.status = 200
+			response.content_type = 'text/html'
+			response.body = { }
+
+			callback = @worker.edit_callback()
+			if callback
+				case callback.arity
+				when 0
+					ret = callback.call()
+				when 1
+					ret = callback.call(JSON.parse(request.body))
+				else
+					response.status = 500
+					response.body = "Invalid callback"
+				end
+			end
+
+			response.body = if ret.class == Hash then
+				puts ret[:msg]
+				ret.to_json
+			else
+				{ msg: '' }.to_json
 			end
 		else
 			response.status = 404

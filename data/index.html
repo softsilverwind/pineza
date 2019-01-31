@@ -5,140 +5,17 @@
 		<meta charset="utf-8" />
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 		<link rel="icon" href="/favicon.ico" type="image/x-icon">
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
-		<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+		<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
 
 		<style>
-			body {
-				padding: 0;
-				margin: 0;
-			}
-			html, body, #map {
-				height: 100vh;
-				width: 100vw;
-			}
+			body { padding: 0; margin: 0; }
+			html, body, #map { height: 100vh; width: 100vw; }
+			.popup-table { width: 100%; }
+			.popup-table-row { background-color: white; }
 		</style>
 
-		<script>
-			var mymap;
-			var group;
-
-			function clearMap() {
-				group.clearLayers();
-			}
-
-			function request(url, method, params, callback)
-			{
-				var http = new XMLHttpRequest();
-
-				http.open(method, url, true);
-
-				if (params)
-				{
-					var params = JSON.stringify(params);
-					http.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-					http.setRequestHeader('Content-length', params.length);
-				}
-
-				http.send(params);
-
-				if (callback)
-					http.onreadystatechange = function() {
-						if (http.readyState == 4)
-							callback(http.responseText, http.status);
-					}
-			}
-
-			function addPoints(points)
-			{
-				for (let point of points)
-					L.marker([point.lat, point.lon]).bindPopup(String(point.info)).addTo(group);
-			}
-
-			function addLines(lines)
-			{
-				for (let line of lines)
-					L.polyline([
-							[line.start.lat, line.start.lon],
-							[line.finish.lat, line.finish.lon]
-						], { color: line.color }
-					).addTo(group);
-			}
-
-			function calcCenter(points)
-			{
-				center = [0.0, 0.0];
-				for (let point of points)
-				{
-					center[0] += point.lat
-					center[1] += point.lon
-				}
-
-				center[0] /= points.length;
-				center[1] /= points.length;
-
-				return center;
-			}
-
-			function move(points, pan)
-			{
-				mustmove = true;
-
-				for (let point of points)
-					mustmove = mustmove && !mymap.getBounds().contains([point.lat, point.lon]);
-
-				if (mustmove)
-					mymap.fitBounds(points);
-			}
-
-			function init_map(pan = true)
-			{
-				request('/data', 'GET', null, function(resp, status) {
-					if (status == 200)
-					{
-						clearMap();
-
-						json = JSON.parse(resp);
-
-						addPoints(json.points);
-						addLines(json.lines);
-
-						move(json.points, pan);
-					}
-				});
-			}
-
-			function keyPress(e)
-			{
-				request('/keypress', 'POST', { 'character' : String.fromCharCode(e.keyCode || e.which) }, init_map);
-			}
-
-			function click(e)
-			{
-				request('/click', 'POST', { 'latlng' : [e.latlng.lat, e.latlng.lng] }, init_map);
-			}
-
-			function init()
-			{
-				mymap = L.map('map').setView([0, 0], 8);
-
-				L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: 'Nope!',
-					maxZoom: 18,
-				}).addTo(mymap);
-
-				group = new L.FeatureGroup();
-				group.addTo(mymap);
-
-				mymap.on('click', click);
-
-				init_map(false);
-			}
-
-			document.addEventListener("keypress", keyPress, false);
-			window.onload = init;
-		</script>
-
+		<script src="/map.js"></script>
 	</head>
 
 	<body>
