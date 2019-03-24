@@ -5,7 +5,7 @@ require_relative 'server'
 require_relative 'popupform'
 
 class Pineza::Worker
-	attr_accessor :points, :lines, :metadata
+	attr_accessor :points, :lines, :metadata, :get_params
 	# Datadir = Gem.datadir('pineza') || 'data/' # buggy
 	Datadir = File.join(Gem.loaded_specs['pineza'].full_gem_path, 'data') || 'data'
 

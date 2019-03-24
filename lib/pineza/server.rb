@@ -15,6 +15,7 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 	def do_GET (request, response)
 		case request.path
 		when '/'
+			@worker.get_params = request.query
 			response.status = 200
 			response.content_type = 'text/html'
 			response.body = File.read(File.join(Datadir, 'index.html'))
