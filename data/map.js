@@ -29,11 +29,36 @@ function request(url, method, params, callback)
         }
 }
 
+function createIcon(color)
+{
+	markerHtmlStyles = `
+	  background-color: ${color};
+	  width: 2rem;
+	  height: 2rem;
+	  display: block;
+	  left: -1.0rem;
+	  top: -1.0rem;
+	  position: relative;
+	  border-radius: 2rem 2rem 0;
+	  transform: rotate(45deg);
+	  border: 1px solid #FFFFFF`
+
+	icon = L.divIcon({
+	  className: "my-custom-pin",
+	  iconAnchor: [0, 24],
+	  labelAnchor: [-6, 0],
+	  popupAnchor: [0, -36],
+	  html: `<span style="${markerHtmlStyles}" />`
+	});
+
+	return icon
+}
+
 function addPoints(points)
 {
     var i = 0;
     for (let point of points)
-        L.marker([point.lat, point.lon], {id: i++}).bindPopup(String(point.info)).on('click', click_marker).addTo(group);
+        L.marker([point.lat, point.lon], {id: i++, icon: createIcon(point.color)}).bindPopup(String(point.info)).on('click', click_marker).addTo(group);
 }
 
 function addLines(lines)

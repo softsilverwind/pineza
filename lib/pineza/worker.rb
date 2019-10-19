@@ -61,7 +61,15 @@ class Pineza::Worker
 
 	def dataset
 		{
-			points: @points.map { |p| { lat: p[0], lon: p[1], info: p[2].class == Hash ? Pineza::PopupForm::generate(p[2]) : p[2] } },
+			points:
+				@points.map { |p|
+					{
+						lat: p[0],
+						lon: p[1],
+						info: p[2].class == Hash ? Pineza::PopupForm::generate(p[2]) : p[2],
+						color: p[3] || '#0000FF'
+					}
+				},
 			lines:
 				@lines.map { |p|
 					{

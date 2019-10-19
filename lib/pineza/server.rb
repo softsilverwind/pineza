@@ -70,12 +70,13 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 				end
 			end
 
-			response.body = if ret.class == Hash
-				puts ret[:msg]
-				ret.to_json
-			else
-				{ msg: '' }.to_json
-			end
+			response.body =
+				if ret.class == Hash
+					puts ret[:msg]
+					ret.to_json
+				else
+					{ msg: '' }.to_json
+				end
 		when '/click'
 			response.content_type = 'text/html'
 			response.status = 200
@@ -95,12 +96,13 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 				end
 			end
 
-			response.body = if ret.class == Hash then
-				puts ret[:msg]
-				ret.to_json
-			else
-				{ msg: '' }.to_json
-			end
+			response.body =
+				if ret.class == Hash then
+					puts ret[:msg]
+					ret.to_json
+				else
+					{ msg: '' }.to_json
+				end
 		when '/marker_click'
 			response.content_type = 'text/html'
 			response.status = 200
@@ -120,12 +122,13 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 				end
 			end
 
-			response.body = if ret.class == Hash then
-				puts ret[:msg]
-				ret.to_json
-			else
-				{ msg: '' }.to_json
-			end
+			response.body =
+				if ret.class == Hash then
+					puts ret[:msg]
+					ret.to_json
+				else
+					{ msg: '' }.to_json
+				end
 		else
 			response.status = 404
 			response.content_type = 'text/html'
@@ -153,12 +156,13 @@ class Pineza::Servlet < WEBrick::HTTPServlet::AbstractServlet
 				end
 			end
 
-			response.body = if ret.class == Hash then
-				puts ret[:msg]
-				ret.to_json
-			else
-				{ msg: '' }.to_json
-			end
+			response.body =
+				if ret.class == Hash then
+					puts ret[:msg]
+					ret.to_json
+				else
+					{ msg: '' }.to_json
+				end
 		else
 			response.status = 404
 			response.content_type = 'text/html'
